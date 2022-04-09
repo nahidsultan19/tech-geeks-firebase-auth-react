@@ -1,20 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./AuthForm.css";
 import GoogleLogo from "../../Assets/Image/google.svg";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../Firebase/firebase.init";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 
 const googleProvider = new GoogleAuthProvider()
 
 const Login = () => {
   const navigate = useNavigate();
 
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('')
+
   const handleGoogleSignIn = () => {
     console.log('Sign in clicked..')
     signInWithPopup(auth, googleProvider)
       .then(result => {
         const user = result.user;
+        navigate('/')
         console.log(user);
       })
       .catch(error => {
@@ -22,21 +27,50 @@ const Login = () => {
       })
   }
 
+  const handleEmail = (event) => {
+    setEmail(event.target.value);
+  }
+
+  const handlePassowrd = (event) => {
+    setPassword(event.target.value);
+  }
+
+  const handleSignInSubmit = event => {
+    event.preventDefault();
+    if (email && password) {
+      signInWithEmailAndPassword(auth, email, password)
+        .then(result => {
+          const user = result.user;
+          console.log(user);
+          navigate('/');
+          setEmail('');
+          setPassword('');
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  }
+
+
+
+
+
   return (
     <div className='auth-form-container '>
       <div className='auth-form'>
         <h1>Login</h1>
-        <form>
+        <form onSubmit={handleSignInSubmit}>
           <div className='input-field'>
             <label htmlFor='email'>Email</label>
             <div className='input-wrapper'>
-              <input type='text' name='email' id='email' />
+              <input onBlur={handleEmail} type='text' name='email' id='email' />
             </div>
           </div>
           <div className='input-field'>
             <label htmlFor='password'>Password</label>
             <div className='input-wrapper'>
-              <input type='password' name='password' id='password' />
+              <input onBlur={handlePassowrd} type='password' name='password' id='password' />
             </div>
           </div>
           <button type='submit' className='auth-form-submit'>
